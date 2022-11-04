@@ -1155,7 +1155,7 @@ static void AudioFileStreamPacketsProc(void* clientData, UInt32 numberBytes, UIn
 -(void) audioQueueFinishedPlaying:(STKQueueEntry*)entry
 {
     STKQueueEntry* next = [bufferingQueue dequeue];
-    
+
     [self processFinishPlayingIfAnyAndPlayingNext:entry withNext:next];
     [self processRunloop];
 }
@@ -2576,11 +2576,19 @@ static BOOL GetHardwareCodecClassDesc(UInt32 formatId, AudioClassDescription* cl
         return;
     }
     
-    status = AUGraphStop(audioGraph);
+//    status = AUGraphStop(audioGraph);
+//
+//    if (status)
+//    {
+//        [self unexpectedError:STKAudioPlayerErrorAudioSystemError];
+//    }
     
-    if (status)
-    {
-        [self unexpectedError:STKAudioPlayerErrorAudioSystemError];
+    if (!(stopReasonIn == STKAudioPlayerStopReasonEof && [[UIDevice currentDevice].systemVersion compare:@"14.0"] != NSOrderedAscending)) {
+        status = AUGraphStop(audioGraph);
+        if (status)
+        {
+            [self unexpectedError:STKAudioPlayerErrorAudioSystemError];
+        }
     }
     
     [self resetPcmBuffers];
